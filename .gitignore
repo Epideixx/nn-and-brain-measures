@@ -1,0 +1,7 @@
+__pycache__
+models
+tedlium_venv
+training_checkpoints
+*test*
+wandb
+main
