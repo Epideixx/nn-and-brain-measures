@@ -81,7 +81,8 @@ def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_p
 
   history = model.fit(data_train, epochs=epochs, callbacks=[checkpoint_callback, WandbMetricsLogger(log_freq=1)], validation_data=data_val)
 
-  model.save(save_model)
+  model.save_weights(save_model)
+
   
   return model, history
 

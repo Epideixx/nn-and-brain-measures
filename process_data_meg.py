@@ -5,6 +5,7 @@ import numpy as np
 import re
 
 from sklearn.linear_model import RidgeCV
+import tensorflow as tf
 
 from tqdm import tqdm
 
@@ -104,7 +105,7 @@ def get_every_phonemes_and_words(df_energy, df_annotations, vocab_words, vocab_p
     return every_sentence_words, every_sentence_phonemes
 
 
-def collect_activations(model, every_sentence_words, every_sentence_phonemes):
+def collect_activations(model, every_sentence_words, every_sentence_phonemes, return_proba_correct = False):
     """
     At each timestep, we collect the hidden activation and the memory activation of the model.
     """
@@ -112,17 +113,34 @@ def collect_activations(model, every_sentence_words, every_sentence_phonemes):
     memory = []
     hidden = []
 
+    proba_correct_word = []
+    proba_correct_phoneme = []
+
     for i in tqdm(range(len(every_sentence_words)), total = len(every_sentence_words)):
 
-        pred_words, pred_phoneme, memory_every_layer, states_every_layer = model((np.array(every_sentence_words[i])[np.newaxis, ...], np.array(every_sentence_phonemes[i])[np.newaxis, ...]), return_state=True)
+        pred_words, pred_phonemes, memory_every_layer, states_every_layer = model((np.array(every_sentence_words[i])[np.newaxis, ...], np.array(every_sentence_phonemes[i])[np.newaxis, ...]), return_state=True)
 
         memory.append(memory_every_layer)
         hidden.append(states_every_layer)
 
+        pred_words = tf.squeeze(pred_words, axis=0)
+        pred_phonemes = tf.squeeze(pred_phonemes, axis=0)
+
+        if i < len(every_sentence_words) - 1:
+            proba_correct_word.append(pred_words[-1, every_sentence_words[i+1][-1]])
+            proba_correct_phoneme.append(pred_phonemes[-1, every_sentence_phonemes[i+1][-1]])
+
+        else : 
+            proba_correct_word.append(pred_words[-1, -1])
+            proba_correct_phoneme.append(pred_phonemes[-1, -1])
+
     memory = np.moveaxis(np.concatenate(memory, axis=0), [0], [1]) # Shape: (n_layers, n_timesteps, rnn_size)
     hidden = np.moveaxis(np.concatenate(hidden, axis=0), [0], [1]) # Shape: (n_layers, n_timesteps, rnn_size)
 
-    return memory, hidden
+    if return_proba_correct:
+        return memory, hidden, proba_correct_word, proba_correct_phoneme
+    else:
+        return memory, hidden, 
 
 
 def regression(memory_train, hidden_train, memory_test, hidden_test, df_energy_train, df_energy_test):
@@ -158,7 +176,9 @@ def regression(memory_train, hidden_train, memory_test, hidden_test, df_energy_t
 
         energy_predict_from_hidden[i] = energy_predict
 
-    return energy_predict_from_memory, energy_predict_from_hidden
+    real_energy = energy_test.copy()
+
+    return energy_predict_from_memory, energy_predict_from_hidden, real_energy
 
     
 

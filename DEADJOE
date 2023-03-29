@@ -1,0 +1,33 @@
+
+*** These modified files were found in JOE when it aborted on Tue Mar 28 17:05:51 2023
+*** JOE was aborted by UNIX signal 1
+
+*** File '(Unnamed)'
+/export03/data/jonathan/nn-and-brain-measures/.git/COMMIT_EDITMSG
+
+*** File '/export03/data/jonathan/nn-and-brain-measures/.git/COMMIT_EDITMSG'
+Push project on Git
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch main
+# Your branch is ahead of 'origin/main' by 1 commit.
+#   (use "git push" to publish your local commits)
+#
+# Changes to be committed:
+#	new file:   .gitignore
+#	new file:   correlation.py
+#	new file:   data.py
+#	new file:   main.py
+#	new file:   model.py
+#	new file:   process_data_meg.py
+#	new file:   requirements.txt
+#
+
+
+*** File '* Startup Log *'
+Processing '/etc/joe/editorrc'...
+Processing '/etc/joe/ftyperc'...
+Finished processing /etc/joe/ftyperc
+Finished processing /etc/joe/editorrc

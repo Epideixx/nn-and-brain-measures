@@ -164,6 +164,6 @@ df_energy_train, df_energy_test = df_energy[cols_before_split], df_energy[cols_a
 
 print("Starting the regression ...")
 
-energy_predict_from_memory, energy_predict_from_hidden = regression(memory_train, hidden_train, memory_test, hidden_test, df_energy_train, df_energy_test)
+energy_predict_from_memory, energy_predict_from_hidden, real_energy = regression(memory_train, hidden_train, memory_test, hidden_test, df_energy_train, df_energy_test)
 
 print("Regression done.")
