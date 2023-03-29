@@ -84,3 +84,58 @@ def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_p
   model.save(save_model)
   
   return model, history
+
+def predict_model(model, words, phones, vocab_phones, vocab_words, n_steps_to_predict = 1):
+
+  """
+  Predicts the phonemes and words for a given sequence of words and phonemes, given as lists.
+  """
+  words_to_return = words.copy()
+  phones_to_return = phones.copy()
+
+  def recursive_predict(words, phones, n_steps_to_predict):
+
+    # Tokenization
+    token_phones = []
+    token_words = []
+
+    for word, phoneme in zip(words, phones):
+
+      token_phone = int(np.where(vocab_phones == phoneme)[0])
+      token_word = np.where(vocab_words == word)
+      if len(token_words) == 0 :
+          token_word = int(np.where(vocab_words == "<unk>")[0])
+      else :
+        token_word = int(token_words[0])
+
+      token_phones.append(token_phone)
+      token_words.append(token_word)
+
+    # Transform input to put in the model
+    token_words = tf.expand_dims(np.array(token_words), axis=0)
+    token_phones = tf.expand_dims(np.array(token_phones), axis=0)
+
+    # Predict the following word and phoneme
+    pred_words, pred_phonemes = model((token_words, token_phones))
+
+    # Transform output back to words and phonemes
+    pred_words = tf.squeeze(pred_words, axis=0)
+    pred_phonemes = tf.squeeze(pred_phonemes, axis=0)
+
+    pred_words = tf.argmax(pred_words, axis=-1)
+    pred_phonemes = tf.argmax(pred_phonemes, axis=-1)
+
+    pred_word = vocab_words[pred_words[-1]]
+    pred_phoneme = vocab_phones[pred_phonemes[-1]]
+
+    words_to_return.append(pred_word)
+    phones_to_return.append(pred_phoneme)
+
+    if n_steps_to_predict == 1:
+      return words_to_return, phones_to_return
+    
+    else :
+      return recursive_predict(words_to_return, phones_to_return, n_steps_to_predict - 1)
+    
+  
+  return recursive_predict(words_to_return, phones_to_return, n_steps_to_predict)
