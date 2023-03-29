@@ -1,0 +1,2 @@
+This folder contains the features from the MEG. There is one folder for each subject, and in this folder one record per ted talk (7 in total).
+Also, there is the texts and annotations from the different ted talks listened by the subjects.
