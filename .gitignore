@@ -1,6 +1,6 @@
 __pycache__
 models
-tedlium_venv
+tedlium_env
 training_checkpoints
 *test*
 wandb
@@ -8,3 +8,4 @@ main
 saved_models
 saved_activations
 predicted_energy
+Figures
