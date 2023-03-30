@@ -28,6 +28,16 @@ EPOCHS = 1
 BATCH_SIZE = 128
 TEST_SIZE = 0.2
 
+SAVE_MODEL_PATH = 'saved_models/model'
+SAVE_HIDDEN_MEMORY_FOLDER = 'saved_activations'
+SAVE_PREDICTED_ENERGY_FOLDER = 'predicted_energy'
+
+TRAINING = True
+GET_ACTIVATIONS = True
+PREDICT_ENERGY = True
+
+# --------------------------------------------------
+
 wandb.init(
     # set the wandb project where this run will be logged
     project="Text_Phoneme_Prediction_LSTM",
@@ -108,20 +118,23 @@ print(model.summary())
 
 # ------ Train the model ------
 
-print("Start training the model...")
+if TRAINING:
 
-model, history = train_model(model, dataset_train, dataset_val, epochs = config["epoch"], learning_rate=config["learning_rate"])
+    print("Start training the model...")
 
-print("Model trained.")
+    model, history = train_model(model, dataset_train, dataset_val, epochs = config["epoch"], learning_rate=config["learning_rate"], save_model = SAVE_MODEL_PATH)
 
+    print("Model trained.")
 
-# ------ Test the model ------
+# ------ Load the model ------
 
-print("Start testing the model...")
+else :
 
-# TO COMPLETE
+    print("Start loading the model...")
 
-print("Model tested.")
+    model.load_weights(SAVE_MODEL_PATH)
+
+    print("Model loaded.")
 
 
 
@@ -132,24 +145,46 @@ print("Model tested.")
 
 SUBJECT = "01"
 RECORD_NUMBER = "1"
-
+    
 print("Load the data containing the kinetic energy ...")
 
 df_energy, df_annotations = load_data_meg(subject = SUBJECT, record_number = RECORD_NUMBER)
 
 print("Data loaded.")
 
-print("Start to create the dataset with the sentences at the different timesteps...")
+if GET_ACTIVATIONS :
+    print("Start to create the dataset with the sentences at the different timesteps...")
 
-every_sentence_words, every_sentence_phonemes = get_every_phonemes_and_words(df_energy, df_annotations, vocab_words, vocab_phones)
+    every_sentence_words, every_sentence_phonemes = get_every_phonemes_and_words(df_energy, df_annotations, vocab_words, vocab_phones)
 
-print("Dataset created.")   
+    print("Dataset created.")   
 
-print("Get hidden and memory states of the model at each timestep ...")
+    print("Get hidden and memory states of the model at each timestep ...")
 
-memory, hidden = collect_activations(model, every_sentence_words, every_sentence_phonemes)
+    memory, hidden = collect_activations(model, every_sentence_words, every_sentence_phonemes) # Shapes: (n_layers, n_timesteps, rnn_size)
 
-print("Hidden and memory states collected for every timestep.")   
+    print("Hidden and memory states collected for every timestep.")
+    
+    folder = os.path.join(SAVE_HIDDEN_MEMORY_FOLDER, SUBJECT, RECORD_NUMBER)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+    save_memory_path = os.path.join(folder, "memory.npy")
+    np.save(save_memory_path, memory)
+
+    save_hidden_path = os.path.join(folder, "hidden.npy")
+    np.save(save_hidden_path, hidden)
+
+else :
+    print("Load hidden and memory states ...")
+    
+    save_memory_path = os.path.join(SAVE_HIDDEN_MEMORY_FOLDER, SUBJECT, RECORD_NUMBER, "memory.npy")
+    save_hidden_path = os.path.join(SAVE_HIDDEN_MEMORY_FOLDER, SUBJECT, RECORD_NUMBER, "hidden.npy")
+
+    memory = np.load(save_memory_path)
+    hidden = np.load(save_hidden_path)
+    
+    print("Activations loaded.")   
 
 # Train - Test Split 
 TEST_SIZE_TIMESTEP = 0.25

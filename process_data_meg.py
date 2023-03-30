@@ -56,7 +56,7 @@ def load_data_meg(main_folder_path = "data/MEG", subject = '01', record_number =
 
 def get_every_phonemes_and_words(df_energy, df_annotations, vocab_words, vocab_phones):
     """
-    Returns a numpy array containing all the sequences of phonemes and words, as id token (so int)>
+    Returns a numpy array containing all the sequences of phonemes and words, as id token (so int)
     Exemple, if the speech is : "The Neuro lab is amazing", we will get, translated in words but in real given as id tokens:
         every_sentence_words = array([The], [The, Neuro], [The, Neuro, lab], [The, Neuro, lab, is) ...
         every_sentence_phonemes = ... (similar)
@@ -146,22 +146,25 @@ def collect_activations(model, every_sentence_words, every_sentence_phonemes, re
 def regression(memory_train, hidden_train, memory_test, hidden_test, df_energy_train, df_energy_test, shift = 0):
     """
     Compute a regression model to predict every voxels' kinetic energy from the hidden and memory activations separatly.
+    Return the prediction of the model on the test set.
     """
     energy_train = np.moveaxis(df_energy_train.to_numpy(), [0], [1]) # Shape: (n_timesteps, n_voxels)
     energy_test= np.moveaxis(df_energy_test.to_numpy(), [0], [1]) # Shape: (n_timesteps, n_voxels)
 
-    energy_train = energy_train[shift:]
-    energy_test = energy_test[shift:]
+    if shift!= 0:
+        energy_train = energy_train[shift:]
+        energy_test = energy_test[shift:]
     
-    energy_predict_from_memory = np.zeros((memory_test.shape[0], energy_test.shape[0], energy_test.shape[1]))
-    energy_predict_from_hidden = np.zeros((hidden_test.shape[0], energy_test.shape[0], energy_test.shape[1]))
+    energy_predict_from_memory = np.zeros((memory_test.shape[0], energy_test.shape[0], energy_test.shape[1])) # Shape: (n_layers, n_timesteps, n_voxels)
+    energy_predict_from_hidden = np.zeros((hidden_test.shape[0], energy_test.shape[0], energy_test.shape[1])) # Shape: (n_layers, n_timesteps, n_voxels)
 
     for i in range(len(memory_train)):
-        activation_train = memory_train[i].copy() # Shape: (n_timesteps, rnn_size)
-        activation_test = memory_test[i].copy() # Shape: (n_timesteps, rnn_size)
+        activation_train = memory_train[i] # Shape: (n_timesteps, rnn_size)
+        activation_test = memory_test[i] # Shape: (n_timesteps, rnn_size)
 
-        activation_train = activation_train[:-shift]
-        activation_test = activation_test[:-shift]
+        if shift != 0:
+            activation_train = activation_train[:-shift]
+            activation_test = activation_test[:-shift]
 
         model = RidgeCV()
         model.fit(activation_train, energy_train)
@@ -172,11 +175,12 @@ def regression(memory_train, hidden_train, memory_test, hidden_test, df_energy_t
 
 
     for i in range(len(hidden_train)):
-        activation_train = hidden_train[i].copy() # Shape: (n_timesteps, rnn_size)
-        activation_test = hidden_test[i].copy() # Shape: (n_timesteps, rnn_size)
+        activation_train = hidden_train[i] # Shape: (n_timesteps, rnn_size)
+        activation_test = hidden_test[i] # Shape: (n_timesteps, rnn_size)
 
-        activation_train = activation_train[:-shift]
-        activation_test = activation_test[:-shift]
+        if shift != 0:
+            activation_train = activation_train[:-shift]
+            activation_test = activation_test[:-shift]
 
         model = RidgeCV()
         model.fit(activation_train, energy_train)

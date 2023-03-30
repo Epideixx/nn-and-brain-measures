@@ -29,7 +29,7 @@ def create_dataset(data, batch_size, shuffle=True, buffer_size=10000, return_voc
     id_break_words = int(np.where(vocab_words == '<break>')[0])
     id_break_phones = int(np.where(vocab_phones == '<break>')[0])
 
-    # Copy the usefull datasets, such we don't have to call it directly form the .npz files
+    # Copy the usefull datasets, such we don't have to call it directly from the .npz files
     data_words_last = data["data_words_last"].copy()
     data_words_curr = data["data_words_curr"].copy()
     data_phones = data["data_phones"].copy()
@@ -39,7 +39,7 @@ def create_dataset(data, batch_size, shuffle=True, buffer_size=10000, return_voc
     dataset_words_next = np.concatenate([data_words_curr[i] + [id_break_words] for i in range(len(data_words_curr))])
     dataset_phones = np.concatenate([data_phones[i] + [id_break_phones] for i in range(len(data_phones))])
 
-    # tensor slices slits the data in tensor of dimension 0 containing only the value
+    # tensor slices splits the datas in tensor of dimension 0 containing only the value
     dataset_words_curr = tf.data.Dataset.from_tensor_slices(dataset_words_curr)
     dataset_words_next = tf.data.Dataset.from_tensor_slices(dataset_words_next)
     dataset_phones = tf.data.Dataset.from_tensor_slices(dataset_phones)
@@ -77,6 +77,7 @@ def create_dataset(data, batch_size, shuffle=True, buffer_size=10000, return_voc
         dataset = (
             dataset
            .batch(batch_size, drop_remainder=True))
+        
     if return_vocab :
         return dataset, vocab_words, vocab_phones
     else :
@@ -84,7 +85,9 @@ def create_dataset(data, batch_size, shuffle=True, buffer_size=10000, return_voc
 
 
 def train_test_split(dataset, test_size=0.2):
-
+    """
+    Split the dataset (normally returned by create_dataset) into train and test sets.
+    """
     train = int((1 - test_size)* len(dataset))
     dataset_train, dataset_test = dataset.take(train), dataset.skip(train)
 

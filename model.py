@@ -30,6 +30,7 @@ class MyModel(tf.keras.Model):
     self.dense_words = tf.keras.layers.Dense(vocab_size_words, activation="softmax")
     self.dense_phoneme = tf.keras.layers.Dense(vocab_size_phoneme, activation="softmax")
 
+
   def call(self, inputs, return_state=False, training=False):
 
     # List to store the activations of each layer
@@ -79,17 +80,20 @@ def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_p
 
   model.compile(optimizer=optimizer, loss=loss)
 
+  # Train the model
   history = model.fit(data_train, epochs=epochs, callbacks=[checkpoint_callback, WandbMetricsLogger(log_freq=1)], validation_data=data_val)
 
+  # Save the model
   model.save_weights(save_model)
-
   
   return model, history
+
 
 def predict_model(model, words, phones, vocab_phones, vocab_words, n_steps_to_predict = 1):
 
   """
   Predicts the phonemes and words for a given sequence of words and phonemes, given as lists.
+  It will predict the n_steps_to_predict following words and phonemes.
   """
   words_to_return = words.copy()
   phones_to_return = phones.copy()
