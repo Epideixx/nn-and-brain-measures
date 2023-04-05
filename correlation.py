@@ -38,7 +38,7 @@ def plot_highest_correlation_per_layer(correlation_with_memory, correlation_with
         ax[layer, 0].plot(real_energy[:, highest_corr_arg], label = "Real")
         ax[layer, 0].set_title("Layer {} from Memory".format(layer))
         ax[layer, 0].set_xlabel("Time")
-        ax[layer, 0].set_ylabel("Correlation")
+        ax[layer, 0].set_ylabel("Kinetic Energy")
         ax[layer, 0].legend(loc = 'upper right')
 
     for layer in range(correlation_with_hidden.shape[0]):
@@ -47,7 +47,7 @@ def plot_highest_correlation_per_layer(correlation_with_memory, correlation_with
         ax[layer, 1].plot(real_energy[:, highest_corr_arg], label = "Real")
         ax[layer, 1].set_title("Layer {} from Hidden".format(layer))
         ax[layer, 1].set_xlabel("Time")
-        ax[layer, 1].set_ylabel("Correlation")
+        ax[layer, 1].set_ylabel("Kinetic Energy")
         ax[layer, 1].legend(loc = 'upper right')
 
     fig.suptitle('Highest Correlation per Layer', fontsize=16)
