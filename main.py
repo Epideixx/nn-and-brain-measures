@@ -19,11 +19,11 @@ from process_data_meg import load_data_meg, get_every_phonemes_and_words, collec
 
 # --------------------------------------------------
 
-NB_LAYERS = 2
-EMBEDDING_DIM_PHONES = 16
-EMBEDDING_DIM_WORDS = 16
-RNN_UNITS = 32
-LR = 0.01
+NB_LAYERS = 5
+EMBEDDING_DIM_PHONES = 64
+EMBEDDING_DIM_WORDS = 128
+RNN_UNITS = 128
+LR_INIT = 0.1
 EPOCHS = 1
 BATCH_SIZE = 128
 TEST_SIZE = 0.2
@@ -49,7 +49,7 @@ wandb.init(
         "activation_final": "softmax",
         "optimizer": "adam",
         "loss": "sparse_categorical_crossentropy",
-        "learning_rate": LR,
+        "learning_rate_init": LR_INIT,
         "epoch": EPOCHS,
         "batch_size": BATCH_SIZE,
         "embedding_dim_phones": EMBEDDING_DIM_PHONES,
@@ -122,7 +122,7 @@ if TRAINING:
 
     print("Start training the model...")
 
-    model, history = train_model(model, dataset_train, dataset_val, epochs = config["epoch"], learning_rate=config["learning_rate"], save_model = SAVE_MODEL_PATH)
+    model, history = train_model(model, dataset_train, dataset_val, epochs = config["epoch"], learning_rate=config["learning_rate_init"], save_model = SAVE_MODEL_PATH)
 
     print("Model trained.")
 

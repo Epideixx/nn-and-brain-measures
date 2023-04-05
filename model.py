@@ -69,7 +69,12 @@ class MyModel(tf.keras.Model):
 def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_path = './training_checkpoints', save_model = "my_model"):
 
   loss = tf.losses.SparseCategoricalCrossentropy(from_logits=False)
-  optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
+  lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+    learning_rate,
+    decay_steps=1000,
+    decay_rate=0.96,
+    staircase=True)
+  optimizer = tf.optimizers.Adam(learning_rate=lr_schedule)
 
   # Name of the checkpoint files
   checkpoint_prefix = os.path.join(checkpoint_path, "check_point_{epoch}")
