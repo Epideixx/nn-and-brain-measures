@@ -20,11 +20,14 @@ class MyModel(tf.keras.Model):
     # Embedding layers 
     self.embedding_words = tf.keras.layers.Embedding(vocab_size_words, embedding_dim_words)
     self.embedding_phoneme = tf.keras.layers.Embedding(vocab_size_phoneme, embedding_dim_phoneme)
+    self.dropout_rate = dropout_rate
 
     # LSTM layers
     self.lstm = [tf.keras.layers.LSTM(rnn_units,
                                    return_sequences=True,
                                    return_state=True) for _ in range(nb_layers)]
+    
+    self.dropout_layer = tf.keras.layers.Dropout(self.dropout_rate)
     
     # Final prediction layers
     self.dense_words = tf.keras.layers.Dense(vocab_size_words, activation="softmax")
@@ -47,6 +50,7 @@ class MyModel(tf.keras.Model):
     # Pass through LSTM + save states
     for lstm in self.lstm:
         x, memory, states = lstm(x, training=training)
+        x = self.dropout_layer(x, training=training)
         memory_every_layer.append(memory[..., np.newaxis, :])
         states_every_layer.append(states[..., np.newaxis, :])
 
@@ -66,7 +70,7 @@ class MyModel(tf.keras.Model):
       # Shapes : (batch_size, seq_len, vocab_words_size)
 
 
-def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_path = './training_checkpoints', save_model = "my_model"):
+def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_path = './training_checkpoints', save_model = "my_model", early_stopping = True):
 
   loss = tf.losses.SparseCategoricalCrossentropy(from_logits=False)
   lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
@@ -82,11 +86,12 @@ def train_model(model, data_train, data_val, epochs, learning_rate, checkpoint_p
   checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
       filepath=checkpoint_prefix,
       save_weights_only=True)
+  early_stopping_callback = tf.keras.callbacks.EarlyStopping(monitor = "val_loss", patience=5)
 
   model.compile(optimizer=optimizer, loss=loss)
 
   # Train the model
-  history = model.fit(data_train, epochs=epochs, callbacks=[checkpoint_callback, WandbMetricsLogger(log_freq=1)], validation_data=data_val)
+  history = model.fit(data_train, epochs=epochs, callbacks=[checkpoint_callback, WandbMetricsLogger(log_freq=1), early_stopping_callback], validation_data=data_val)
 
   # Save the model
   model.save_weights(save_model)

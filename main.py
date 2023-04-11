@@ -19,18 +19,19 @@ from process_data_meg import load_data_meg, get_every_phonemes_and_words, collec
 
 # --------------------------------------------------
 
-NB_LAYERS = 5
+NB_LAYERS = 4
 EMBEDDING_DIM_PHONES = 64
 EMBEDDING_DIM_WORDS = 128
-RNN_UNITS = 128
-LR_INIT = 0.1
-EPOCHS = 1
-BATCH_SIZE = 128
+RNN_UNITS = 1024
+LR_INIT = 0.002
+EPOCHS = 60
+BATCH_SIZE = 64
 TEST_SIZE = 0.2
+DROPOUT = 0.2
 
-SAVE_MODEL_PATH = 'saved_models/model'
-SAVE_HIDDEN_MEMORY_FOLDER = 'saved_activations'
-SAVE_PREDICTED_ENERGY_FOLDER = 'predicted_energy'
+SAVE_MODEL_PATH = 'saved_models/model_main_02'
+SAVE_HIDDEN_MEMORY_FOLDER = 'saved_activations_main_02'
+SAVE_PREDICTED_ENERGY_FOLDER = 'predicted_energy_main_02'
 
 TRAINING = True
 GET_ACTIVATIONS = True
@@ -55,6 +56,7 @@ wandb.init(
         "embedding_dim_phones": EMBEDDING_DIM_PHONES,
         "embedding_dim_words" : EMBEDDING_DIM_WORDS,
         "test_size": TEST_SIZE,
+        "dropout": DROPOUT
     }
 )
 
